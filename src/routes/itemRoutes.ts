@@ -1,9 +1,10 @@
 import { Server } from "@hapi/hapi"
-import { CreateItemDTO, UpdateItemDTO } from "../models/Item";
+import { CreateItemDTO, Item, UpdateItemDTO } from "../models/Item";
 import { ItemRepository } from "../repositories/itemRepository"
 import { ItemService } from "../services/itemService";
 import { ItemController } from "../controllers/ItemController";
 import { ValidationException } from "../types/validationError";
+import { validatePayload } from "../middlewares/validatePayload";
 
 export const itemRoutes = (server: Server) => {
     const itemRepository = new ItemRepository()
@@ -25,6 +26,9 @@ export const itemRoutes = (server: Server) => {
         method: 'POST',
         path: '/items',
         options: {  
+            pre: [
+                { method: validatePayload }
+            ],
             payload: {
                 parse: true,
                 allow: ['application/json']
@@ -33,14 +37,6 @@ export const itemRoutes = (server: Server) => {
         handler: async (req, res) => {
             try {            
                 
-                if (!req.payload) {
-                    return res.response({
-                        errors: [{
-                            message: 'Request payload is required'
-                        }]
-                    }).code(400)
-                }
-
                 const payload = req.payload as CreateItemDTO;
 
                 const data: CreateItemDTO = {
@@ -57,11 +53,8 @@ export const itemRoutes = (server: Server) => {
                         errors: error.errors
                     }).code(400);
                 }
-            
-                return res.response({ 
-                    message: 'An unexpected error occurred',
-                    error: error instanceof Error ? error.message : 'Unknown error'
-                }).code(500);
+                
+                throw error; 
             }
         }
         
@@ -86,11 +79,8 @@ export const itemRoutes = (server: Server) => {
                         errors: error.errors
                     }).code(400);
                 }
-            
-                return res.response({ 
-                    message: 'An unexpected error occurred',
-                    error: error instanceof Error ? error.message : 'Unknown error'
-                }).code(500);
+
+                throw error; 
             }
         }
     });
@@ -118,7 +108,7 @@ export const itemRoutes = (server: Server) => {
                     return res.response({ message: "Item not found" }).code(404);
                 }
 
-                const parsedItem: UpdateItemDTO = {
+                const parsedItem: Item = {
                     ...itemFounded,
                     price: Number(itemFounded.price)
                 };
@@ -131,11 +121,8 @@ export const itemRoutes = (server: Server) => {
                         errors: error.errors
                     }).code(400);
                 }
-            
-                return res.response({ 
-                    message: 'An unexpected error occurred',
-                    error: error instanceof Error ? error.message : 'Unknown error'
-                }).code(500);
+                
+                throw error; 
             }
             
         }
@@ -146,6 +133,9 @@ export const itemRoutes = (server: Server) => {
         method: 'PUT',
         path: '/items/{id}',
         options: {
+            pre: [
+                { method: validatePayload }
+            ],
             payload: {
                 parse: true,
                 allow: ['application/json']
@@ -187,11 +177,8 @@ export const itemRoutes = (server: Server) => {
                         errors: error.errors
                     }).code(400);
                 }
-            
-                return res.response({ 
-                    message: 'An unexpected error occurred',
-                    error: error instanceof Error ? error.message : 'Unknown error'
-                }).code(500);
+                
+                throw error; 
             }
         }
     })
@@ -216,18 +203,15 @@ export const itemRoutes = (server: Server) => {
                 if (!deleted) {
                     return res.response({ message: "Item can't be deleted" }).code(500);
                 }
-                return res.response({ message: "Item eliminado" }).code(204);
+                return res.response({ message: "Item deleted" }).code(204);
             }catch (error) {
                 if (error instanceof ValidationException) {
                     return res.response({
                         errors: error.errors
                     }).code(400);
                 }
-            
-                return res.response({ 
-                    message: 'An unexpected error occurred',
-                    error: error instanceof Error ? error.message : 'Unknown error'
-                }).code(500);                
+                
+                throw error;                
             }
 
         }
