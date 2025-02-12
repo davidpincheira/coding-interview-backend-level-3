@@ -1,5 +1,6 @@
 import Hapi from '@hapi/hapi'
-import { defineRoutes } from './routes'
+import { itemRoutes } from './routes/itemRoutes'
+import { initializeDatabase } from './config/database'
 
 const getServer = () => {
     const server = Hapi.server({
@@ -7,12 +8,13 @@ const getServer = () => {
         port: 3000,
     })
 
-    defineRoutes(server)
+    itemRoutes(server)
 
     return server
 }
 
 export const initializeServer = async () => {
+    await initializeDatabase()
     const server = getServer()
     await server.initialize()
     return server

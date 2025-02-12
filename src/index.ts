@@ -1,8 +1,11 @@
-import { initializeServer, startServer } from "./server"
+import { startServer, initializeServer } from "./server"
 
 process.on('unhandledRejection', (err) => {
     console.error(err)
     process.exit(1)
 })
 
-await startServer()
+void startServer().catch(err => {
+    console.error(err)
+    process.exit(1)
+})
