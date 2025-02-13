@@ -227,6 +227,85 @@ describe('E2E Tests', () => {
         })
     })
 
+    /* tests extras */
+    describe("Additional Validations", () => {
+        it("should validate item name is not empty", async () => {
+            const response = await server.inject({
+                method: 'POST',
+                url: '/items',
+                payload: {
+                    name: '',
+                    price: 10
+                }
+            })
+            expect(response.statusCode).toBe(400)
+            expect(response.result).toEqual({
+                errors: [{
+                    field: 'name',
+                    message: 'Field "name" is required'
+                }]
+            })
+        })
+
+        it("should validate maximum price limit", async () => {
+            const response = await server.inject({
+                method: 'POST',
+                url: '/items',
+                payload: {
+                    name: 'Expensive Item',
+                    price: 1000000000
+                }
+            })
+            expect(response.statusCode).toBe(400)
+        })
+
+        it("should validate item name length", async () => {
+            const response = await server.inject({
+                method: 'POST',
+                url: '/items',
+                payload: {
+                    name: 'a'.repeat(256),
+                    price: 10
+                }
+            })
+            expect(response.statusCode).toBe(400)
+        })
+    })
+
+    describe("Edge Cases", () => {
+    
+        it("should handle concurrent item creation", async () => {
+            const promises = Array(5).fill(null).map((_, index) => 
+                server.inject({
+                    method: 'POST',
+                    url: '/items',
+                    payload: {
+                        name: `Concurrent Item ${index}`,
+                        price: 10
+                    }
+                })
+            )
+            
+            const responses = await Promise.all(promises)
+            const ids = responses.map(r => r.result.id)
+            
+            // Verificar que todos los IDs son únicos
+            expect(new Set(ids).size).toBe(promises.length)
+        })
+    
+        it("should handle special characters in item names", async () => {
+            const response = await server.inject({
+                method: 'POST',
+                url: '/items',
+                payload: {
+                    name: 'Item with špécíal chárácters!@#$%^&*()',
+                    price: 10
+                }
+            })
+            expect(response.statusCode).toBe(201)
+        })
+    })
+
     afterAll(() => {
         return server.stop()
     })
