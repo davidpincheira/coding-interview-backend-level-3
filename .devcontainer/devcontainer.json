@@ -4,5 +4,10 @@
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
-  "remoteUser": "node"
+  "remoteUser": "node",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {}
+    },
+	"forwardPorts": [3000],
+	"postCreateCommand": "npm install"
 }
