@@ -22,8 +22,13 @@ export const createTableQuery = `
 // Inicializar la base de datos
 export const initializeDatabase = async () => {
     try {
-        await pool.query(createTableQuery)
-        console.log('Database initialized successfully')
+        const client = await pool.connect()
+        console.log('Connected to database successfully')
+        
+        await client.query(createTableQuery)
+        console.log('Table initialization completed')
+        
+        client.release()
     } catch (error) {
         console.error('Error initializing database:', error)
         throw error

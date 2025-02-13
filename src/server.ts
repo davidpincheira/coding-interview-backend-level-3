@@ -4,7 +4,7 @@ import { initializeDatabase } from './config/database'
 
 const getServer = () => {
     const server = Hapi.server({
-        host: 'localhost',
+        host: '0.0.0.0',
         port: 3000,
     })
 
@@ -14,9 +14,11 @@ const getServer = () => {
 }
 
 export const initializeServer = async () => {
+    console.log('Initializing database...')
     await initializeDatabase()
     const server = getServer()
     await server.initialize()
+    console.log('Server initialized')
     return server
 }
 
