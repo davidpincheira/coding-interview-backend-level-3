@@ -23,4 +23,8 @@ export class ItemController {
     async deleteItem(id: number): Promise<boolean> {
         return this.service.deleteItem(id)
     }
+
+    async getItemByParams(minPrice: number, maxPrice: number) {
+        return this.service.getItemByParams(minPrice, maxPrice)
+    }
 }

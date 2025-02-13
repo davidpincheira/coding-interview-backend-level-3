@@ -69,4 +69,8 @@ export class ItemService {
         return this.repository.delete(id)
     }
 
+    async getItemByParams(minPrice: number, maxPrice: number): Promise<Item[]> {
+        return this.repository.findByPriceRange(minPrice, maxPrice)        
+    }
+
 }

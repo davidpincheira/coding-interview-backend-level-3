@@ -216,4 +216,34 @@ export const itemRoutes = (server: Server) => {
 
         }
     });
+
+    //one item by params
+    server.route({
+        method: 'GET',
+        path: '/items/filter/{minPrice}/{maxPrice}',
+        handler: async (req, res) => {
+            try {
+                const minPrice = req.params.minPrice;
+                const maxPrice = req.params.maxPrice;
+
+                const itemFounded = await itemController.getItemByParams(minPrice, maxPrice);
+
+                if (itemFounded == null) {
+                    return res.response({ message: "Item not found" }).code(404);
+                }
+                
+                return res.response(itemFounded);
+
+            } catch (error) {
+                if (error instanceof ValidationException) {
+                    return res.response({
+                        errors: error.errors
+                    }).code(400);
+                }
+                
+                throw error; 
+            }
+            
+        }
+    });
 }

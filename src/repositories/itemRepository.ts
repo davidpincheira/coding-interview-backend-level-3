@@ -38,4 +38,14 @@ export class ItemRepository {
         )
         return (rowCount ?? 0) > 0
     }
+
+    async findByPriceRange(min: number, max: number): Promise<Item[]> {
+
+        const { rows } = await pool.query(
+            'SELECT * FROM items WHERE price BETWEEN $1 AND $2',
+            [min, max]
+        )
+        return rows
+        
+    }
 }
